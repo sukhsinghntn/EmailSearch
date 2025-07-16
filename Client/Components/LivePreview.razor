@@ -12,7 +12,10 @@
     @foreach (var field in row.Fields)
     {
         <div class="col-12 col-md-@(12 / (row.Fields.Count == 0 ? 1 : row.Fields.Count)) mb-3">
-            <label class="form-label">@field.Label</label>
+            @if (field.FieldType != "title" && field.FieldType != "section")
+            {
+                <label class="form-label">@field.Label</label>
+            }
 
         @switch (field.FieldType)
         {

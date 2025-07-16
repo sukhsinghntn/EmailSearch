@@ -4,6 +4,7 @@ using DynamicFormsApp.Client.Services;
 using DynamicFormsApp.Shared.Services;
 using DynamicFormsApp.Server.Services;
 using DynamicFormsApp.Server.Data;
+using Microsoft.AspNetCore.Authentication.Negotiate;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 
@@ -43,6 +44,13 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<CookieHelper>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 
+builder.Services.AddAuthentication(NegotiateDefaults.AuthenticationScheme)
+       .AddNegotiate();
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = options.DefaultPolicy;
+});
+
 builder.Services.AddControllers();
 builder.Services.AddRadzenComponents();
 builder.Services.AddHttpClient();
@@ -65,6 +73,8 @@ else
 
 app.UseHttpsRedirection();
 app.UseResponseCompression();
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
 app.UseStaticFiles();
 app.UseAntiforgery();
