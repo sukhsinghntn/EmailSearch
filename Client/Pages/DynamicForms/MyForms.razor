@@ -45,12 +45,17 @@ else
                             <a class="btn btn-sm btn-secondary me-2" href="@($"/forms/{f.Id}/edit")">Edit</a>
                             <a class="btn btn-sm btn-secondary me-2" href="@($"/forms/{f.Id}/responses")">Responses</a>
                             <a class="btn btn-sm btn-info me-2" href="@($"/forms/{f.Id}/summary")">Summary</a>
-                            <button class="btn btn-sm btn-outline-secondary me-2" @onclick="() => ShareForm(f.Id)">Share</button>
+                            <button class="btn btn-sm btn-outline-secondary me-2" @onclick="() => ShareForm(f.Id)">
+                                <span class="material-icons">share</span>
+                                <span class="badge bg-secondary ms-1">@GetShareCount(f.Id)</span>
+                            </button>
                             @if (f.PreviousVersionId != null)
                             {
                                 <a class="btn btn-sm btn-outline-secondary me-2" href="@($"/forms/{f.Id}/history")">History</a>
                             }
-                            <button class="btn btn-sm btn-danger" @onclick="() => DeleteForm(f.Id)">Delete</button>
+                            <button class="btn btn-sm btn-danger" title="Delete" @onclick="() => DeleteForm(f.Id)">
+                                <span class="material-icons">delete</span>
+                            </button>
                         </td>
                     </tr>
                 }
@@ -61,6 +66,7 @@ else
 
 @code {
     private List<Form>? forms;
+    private Dictionary<int, int> shareCounts = new();
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -75,6 +81,7 @@ else
             }
 
             forms = await Http.GetFromJsonAsync<List<Form>>("api/forms/mine");
+            await LoadShareCounts();
             StateHasChanged();
         }
     }
@@ -136,7 +143,28 @@ else
             ["FormId"] = id
         };
 
-        await DialogService.OpenAsync<ShareFormDialog>("Share Form", parameters,
+        var result = await DialogService.OpenAsync<ShareFormDialog>("Share Form", parameters,
             new DialogOptions { Width = "500px" });
+        if (result is bool b && b)
+        {
+            await LoadShareCount(id);
+            StateHasChanged();
+        }
+    }
+
+    private int GetShareCount(int id) => shareCounts.TryGetValue(id, out var c) ? c : 0;
+
+    private async Task LoadShareCounts()
+    {
+        foreach (var f in forms ?? Enumerable.Empty<Form>())
+        {
+            await LoadShareCount(f.Id);
+        }
+    }
+
+    private async Task LoadShareCount(int id)
+    {
+        var shares = await Http.GetFromJsonAsync<List<FormShare>>($"api/forms/{id}/shares");
+        shareCounts[id] = shares?.Count ?? 0;
     }
 }
