@@ -79,7 +79,9 @@ else
                 return;
             }
 
-            forms = await Http.GetFromJsonAsync<List<Form>>("api/forms/deleted");
+            forms = (await Http.GetFromJsonAsync<List<Form>>("api/forms/deleted"))
+                ?.Where(f => !f.IsDraft)
+                .ToList();
             StateHasChanged();
         }
     }

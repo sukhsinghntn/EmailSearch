@@ -20,7 +20,11 @@
     </div>
 
 </div>
-@if (!string.IsNullOrEmpty(deletedMessage))
+@if (unavailableInfo != null)
+{
+    <FormUnavailableDisplay Info="@unavailableInfo" />
+}
+else if (!string.IsNullOrEmpty(deletedMessage))
 {
     <div class="alert alert-warning">@deletedMessage</div>
 }
@@ -106,6 +110,7 @@ else
     private string? responderName;
     private IJSObjectReference? exportModule;
     private string? deletedMessage;
+    private DeletedFormInfo? unavailableInfo;
 
     int? PrevId =>
         responseIds != null && responseIds.IndexOf(ResponseId) > 0
@@ -147,8 +152,7 @@ else
         {
             if (respForm.StatusCode == HttpStatusCode.Gone)
             {
-                var info = await respForm.Content.ReadFromJsonAsync<DeletedFormInfo>();
-                deletedMessage = $"{info?.Message} Contact {info?.Owner} ({info?.Email}).";
+                unavailableInfo = await respForm.Content.ReadFromJsonAsync<DeletedFormInfo>();
             }
             else
             {
