@@ -9,7 +9,11 @@
 
 <h3>Summary for @form?.Name</h3>
 <p class="text-muted">@form?.Description</p>
-@if (!string.IsNullOrEmpty(deletedMessage))
+@if (unavailableInfo != null)
+{
+    <FormUnavailableDisplay Info="@unavailableInfo" />
+}
+else if (!string.IsNullOrEmpty(deletedMessage))
 {
     <div class="alert alert-warning">@deletedMessage</div>
 }
@@ -76,6 +80,7 @@ else
     private Form form;
     private List<Dictionary<string, object>> responses;
     private string? deletedMessage;
+    private DeletedFormInfo? unavailableInfo;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -94,8 +99,7 @@ else
             {
                 if (respForm.StatusCode == HttpStatusCode.Gone)
                 {
-                    var info = await respForm.Content.ReadFromJsonAsync<DeletedFormInfo>();
-                    deletedMessage = $"{info?.Message} Contact {info?.Owner} ({info?.Email}).";
+                    unavailableInfo = await respForm.Content.ReadFromJsonAsync<DeletedFormInfo>();
                 }
                 else
                 {

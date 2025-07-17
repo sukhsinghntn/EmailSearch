@@ -7,7 +7,11 @@
 @inject CookieHelper CookieHelper
 
 <h3 class="mb-3">Form Versions</h3>
-@if (!string.IsNullOrEmpty(deletedMessage))
+@if (unavailableInfo != null)
+{
+    <FormUnavailableDisplay Info="@unavailableInfo" />
+}
+else if (!string.IsNullOrEmpty(deletedMessage))
 {
     <div class="alert alert-warning">@deletedMessage</div>
 }
@@ -36,6 +40,7 @@ else
     [Parameter] public int FormId { get; set; }
     private List<Form>? versions;
     private string? deletedMessage;
+    private DeletedFormInfo? unavailableInfo;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -54,8 +59,7 @@ else
             {
                 if (resp.StatusCode == HttpStatusCode.Gone)
                 {
-                    var info = await resp.Content.ReadFromJsonAsync<DeletedFormInfo>();
-                    deletedMessage = $"{info?.Message} Contact {info?.Owner} ({info?.Email}).";
+                    unavailableInfo = await resp.Content.ReadFromJsonAsync<DeletedFormInfo>();
                 }
                 else
                 {
