@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@using DynamicFormsApp.Shared.Models
 <RadzenComponents />
 
 <!-- Define the overall layout of the page using RadzenLayout -->
@@ -13,8 +14,13 @@
                 <RadzenSidebarToggle Click="@SidebarToggleClick" Icon="@sidebarToggleIcon"></RadzenSidebarToggle>
             </RadzenColumn>
 
+            <!-- Column for breadcrumb navigation -->
+            <RadzenColumn Size="6">
+                <BreadcrumbNav />
+            </RadzenColumn>
+
             <!-- Column for user-related actions -->
-            <RadzenColumn Size="10">
+            <RadzenColumn Size="4">
                 <RadzenStack AlignItems="AlignItems.Center" Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
                     @if (waitingforuserload)
                     {
@@ -38,11 +44,6 @@
                         <RadzenProgressBarCircular ProgressBarStyle="Radzen.ProgressBarStyle.Warning" Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" Size="Radzen.ProgressBarCircularSize.Small" />
                     }
                 </RadzenStack>
-            </RadzenColumn>
-        </RadzenRow>
-        <RadzenRow>
-            <RadzenColumn Size="12">
-                <BreadcrumbNav />
             </RadzenColumn>
         </RadzenRow>
     </RadzenHeader>
@@ -78,7 +79,7 @@
                 {
                     <RadzenButton Icon="bug_report" Click="@ReportBug" Text="Report Bug" ButtonStyle="ButtonStyle.Warning" Style="border-radius: 4px; margin: 10px;" class=@dynamicClass></RadzenButton>
                 }
-                <RadzenText Text="DynamicFormsApp v0.9.0" TextStyle="Radzen.Blazor.TextStyle.Caption" TagName="Radzen.Blazor.TagName.P" TextAlign="Radzen.TextAlign.Center" class=@dynamicClass />
+                <RadzenText Text="DynamicFormsApp v@AppInfo.Version" TextStyle="Radzen.Blazor.TextStyle.Caption" TagName="Radzen.Blazor.TagName.P" TextAlign="Radzen.TextAlign.Center" class=@dynamicClass />
             </RadzenStack>
         </div>
     </RadzenSidebar>

@@ -11,47 +11,49 @@
 
 <div class="row row-cols-1 row-cols-md-4 g-3 mb-5 justify-content-center">
     <div class="col" style="max-width:200px;">
-        <div class="card text-center h-100">
-            <div class="card-body">
-                <h3>@totalForms</h3>
-                <p class="text-muted mb-0">Total Forms</p>
+        <a href="/forms/new" class="text-decoration-none">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <span class="material-icons" style="font-size:3rem;">add_circle</span>
+                    <p class="text-muted mb-0">Create Form</p>
+                </div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col" style="max-width:200px;">
-        <div class="card text-center h-100">
-            <div class="card-body">
-                <h3>@myForms</h3>
-                <p class="text-muted mb-0">My Forms</p>
+        <a href="/myforms" class="text-decoration-none">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <h3>@myForms</h3>
+                    <p class="text-muted mb-0">My Forms</p>
+                </div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col" style="max-width:200px;">
-        <div class="card text-center h-100">
-            <div class="card-body">
-                <h3>@drafts</h3>
-                <p class="text-muted mb-0">Drafts</p>
+        <a href="/draftforms" class="text-decoration-none">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <h3>@drafts</h3>
+                    <p class="text-muted mb-0">Drafts</p>
+                </div>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col" style="max-width:200px;">
-        <div class="card text-center h-100">
-            <div class="card-body">
-                <h3>@shared</h3>
-                <p class="text-muted mb-0">Shared With Me</p>
+        <a href="/sharedforms" class="text-decoration-none">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <h3>@shared</h3>
+                    <p class="text-muted mb-0">Shared With Me</p>
+                </div>
             </div>
-        </div>
+        </a>
     </div>
 </div>
 
-<div class="d-flex justify-content-center gap-3 mb-4">
-    <a href="/forms/new" class="btn btn-primary">Create Form</a>
-    <a href="/myforms" class="btn btn-secondary">My Forms</a>
-    <a href="/sharedforms" class="btn btn-secondary">Shared With Me</a>
-</div>
 
 @code {
-    private int totalForms;
     private int myForms;
     private int drafts;
     private int shared;
@@ -67,7 +69,6 @@
             }
             else
             {
-                totalForms = await Http.GetFromJsonAsync<int>("api/forms/count");
                 var mine = await Http.GetFromJsonAsync<List<Form>>("api/forms/mine");
                 myForms = mine?.Count(f => f.IsActive) ?? 0;
                 var draftsList = await Http.GetFromJsonAsync<List<Form>>("api/forms/drafts");

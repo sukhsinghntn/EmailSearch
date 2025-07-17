@@ -367,7 +367,9 @@ namespace DynamicFormsApp.Server.Controllers
             {
                 Message = message,
                 Owner = owner?.DisplayName ?? form.CreatedBy,
-                Email = owner?.Email
+                Email = owner?.Email,
+                FormName = form.Name,
+                FormDescription = form.Description
             });
         }
     }

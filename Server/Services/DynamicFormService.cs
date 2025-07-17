@@ -325,7 +325,7 @@ namespace DynamicFormsApp.Server.Services
         {
             return await _db.Forms
                 .Include(f => f.Fields)
-                .Where(f => f.IsDeleted)
+                .Where(f => f.IsDeleted && !f.IsDraft)
                 .ToListAsync();
         }
 

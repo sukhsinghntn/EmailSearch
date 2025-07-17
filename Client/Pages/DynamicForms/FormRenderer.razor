@@ -9,11 +9,15 @@
 @inject NavigationManager Navigation
 @inject CookieHelper CookieHelper
 
-<h3>@(!string.IsNullOrEmpty(statusMessage)
+<h3>@(!string.IsNullOrEmpty(statusMessage) || unavailableInfo != null
         ? "Form Not Available"
         : form?.Name ?? "Loading…")</h3>
 <p class="text-muted">@form?.Description</p>
-@if (!string.IsNullOrEmpty(statusMessage))
+@if (unavailableInfo != null)
+{
+    <FormUnavailableDisplay Info="@unavailableInfo" />
+}
+else if (!string.IsNullOrEmpty(statusMessage))
 {
     <div class="alert alert-warning">@statusMessage</div>
 }
@@ -85,8 +89,8 @@ else
 
                     case "dropdown":
                         var ddOptions = JsonSerializer.Deserialize<List<string>>(fld.OptionsJson ?? "[]");
-                        <select class="form-select"
-                                @onchange="e => OnTextChanged(fld.Key, e)">
+                        <select class="form-select" value="@GetString(fld.Key)" @onchange="e => OnTextChanged(fld.Key, e)">
+                            <option value="" disabled selected>Select...</option>
                             @foreach (var opt in ddOptions)
                             {
                                 <option value="@opt">@opt</option>
@@ -176,6 +180,7 @@ else
     private Form form;
     private Dictionary<string, object> responseData = new();
     private string? statusMessage;
+    private DeletedFormInfo? unavailableInfo;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -186,8 +191,7 @@ else
             {
                 if (resp.StatusCode == HttpStatusCode.Gone)
                 {
-                    var info = await resp.Content.ReadFromJsonAsync<DeletedFormInfo>();
-                    statusMessage = $"{info?.Message} Contact {info?.Owner} ({info?.Email}).";
+                    unavailableInfo = await resp.Content.ReadFromJsonAsync<DeletedFormInfo>();
                 }
                 else
                 {
@@ -326,7 +330,16 @@ else
         }
 
         await Http.PostAsJsonAsync($"api/forms/{FormId}/responses", responseData);
-        Navigation.NavigateTo($"/forms/{FormId}/responses");
+
+        var user = await CookieHelper.LoginStatus();
+        if (string.IsNullOrEmpty(user))
+        {
+            Navigation.NavigateTo($"/forms/{FormId}/submitted", true);
+        }
+        else
+        {
+            Navigation.NavigateTo($"/forms/{FormId}/responses");
+        }
     }
 
     bool IsEmpty(object value)
