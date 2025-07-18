@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using DynamicFormsApp.Shared.Models;
 using DynamicFormsApp.Shared.Services;
 
@@ -17,6 +18,7 @@ namespace DynamicFormsApp.Server.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public async Task<bool> ValidateUser([FromBody] UserModel user)
         {
             return await _userService.ValidateUser(user);
@@ -47,6 +49,14 @@ namespace DynamicFormsApp.Server.Controllers
         {
             var users = await _userService.SearchUsers(term ?? string.Empty);
             return Ok(users);
+        }
+
+        [HttpGet("current")]
+        [Authorize]
+        public async Task<ActionResult<string?>> GetCurrentUser()
+        {
+            var userName = await _userService.GetCurrentUserName();
+            return Ok(userName);
         }
     }
 }

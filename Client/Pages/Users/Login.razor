@@ -55,6 +55,24 @@ else
     {
         if (firstRender)
         {
+            try
+            {
+                var winUser = await UserService.GetCurrentUserName();
+                if (!string.IsNullOrEmpty(winUser))
+                {
+                    await CookieHelper.LoginUser(winUser);
+                    var uri = new Uri(NavigationManager.Uri);
+                    var returnUrl = uri.Query.Contains("returnUrl") ? uri.Query.Substring(uri.Query.IndexOf("returnUrl") + 10) : "/";
+                    returnUrl = Uri.UnescapeDataString(returnUrl);
+                    NavigationManager.NavigateTo(returnUrl, true);
+                    return;
+                }
+            }
+            catch
+            {
+                // ignore errors when attempting auto-login
+            }
+
             // Hide loading spinner after the initial render
             isLoading = false;
             StateHasChanged();
