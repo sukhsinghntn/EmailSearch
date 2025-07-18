@@ -280,6 +280,34 @@ namespace DynamicFormsApp.Server.Controllers
             return NoContent();
         }
 
+        [HttpPost("{id}/owner")]
+        public async Task<IActionResult> ChangeOwner(int id, [FromBody] ChangeOwnerDto dto)
+        {
+            if (!Request.Cookies.TryGetValue("userName", out var requester) || string.IsNullOrEmpty(requester))
+            {
+                return Unauthorized();
+            }
+
+            var info = await _userSvc.GetUserData(requester);
+            if (!string.Equals(info?.Department, "Information Technology", StringComparison.OrdinalIgnoreCase))
+            {
+                return Unauthorized();
+            }
+
+            await _svc.ChangeOwnerAsync(id, dto.NewOwner);
+
+            var target = await _userSvc.GetUserData(dto.NewOwner);
+            var form = await _svc.GetFormAsync(id);
+            var sender = await _userSvc.GetUserData(requester);
+            if (target != null && !string.IsNullOrEmpty(target.Email))
+            {
+                var transferredBy = sender?.DisplayName ?? requester;
+                await _emailSvc.SendFormTransferNotification(target.Email, form.Name, form.Description, form.Id, transferredBy);
+            }
+
+            return NoContent();
+        }
+
         [HttpGet("{id}/shares")]
         public async Task<ActionResult<IEnumerable<FormShare>>> Shares(int id)
         {
