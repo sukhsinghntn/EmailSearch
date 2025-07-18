@@ -108,5 +108,35 @@ namespace DynamicFormsApp.Server.Services
             };
             await client.SendMailAsync(mail);
         }
+
+        public async Task SendFormTransferNotification(string toEmail, string formName, string? description, int formId, string transferredBy)
+        {
+            var baseUrl = _configuration["AppBaseUrl"]?.TrimEnd('/') ?? string.Empty;
+            var formLink = $"{baseUrl}/forms/{formId}";
+
+            var descBlock = string.IsNullOrWhiteSpace(description) ? string.Empty : $"<p>{description}</p>";
+
+            var mail = new MailMessage
+            {
+                From = new MailAddress(_configuration["Email:From"] ?? "noreply@example.com"),
+                Subject = $"{transferredBy} transferred a form to you",
+                Body = $@"<div style='font-family:sans-serif;font-size:14px;line-height:1.5'>
+                            <p><strong>{transferredBy}</strong> has transferred the form <strong>{formName}</strong> to you.</p>
+                            {descBlock}
+                            <p style='text-align:center;margin:20px 0'>
+                                <a href='{formLink}' style='display:inline-block;padding:10px 20px;background-color:#007bff;color:#fff;text-decoration:none;border-radius:4px'>👉 View the Form</a>
+                            </p>
+                        </div>",
+                IsBodyHtml = true
+            };
+
+            mail.To.Add(toEmail);
+
+            using var client = new SmtpClient(_configuration["Email:IP"])
+            {
+                Port = int.Parse(_configuration["Email:Port"]!)
+            };
+            await client.SendMailAsync(mail);
+        }
     }
 }
