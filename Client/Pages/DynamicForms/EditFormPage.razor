@@ -14,7 +14,11 @@
 @implements IDisposable
 
 <h2 class="mb-2">Form Builder</h2>
-@if (!string.IsNullOrEmpty(deletedMessage))
+@if (unavailableInfo != null)
+{
+    <FormUnavailableDisplay Info="@unavailableInfo" />
+}
+else if (!string.IsNullOrEmpty(deletedMessage))
 {
     <div class="alert alert-warning">@deletedMessage</div>
 }
@@ -135,6 +139,7 @@ else
     private UserModel? currentUser;
     private DotNetObjectReference<DynamicFormsApp.Client.Pages.DynamicForms.EditFormPage>? objRef;
     private string? deletedMessage;
+    private DeletedFormInfo? unavailableInfo;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -156,8 +161,7 @@ else
             {
                 if (resp.StatusCode == HttpStatusCode.Gone)
                 {
-                    var info = await resp.Content.ReadFromJsonAsync<DeletedFormInfo>();
-                    deletedMessage = $"{info?.Message} Contact {info?.Owner} ({info?.Email}).";
+                    unavailableInfo = await resp.Content.ReadFromJsonAsync<DeletedFormInfo>();
                 }
                 else
                 {

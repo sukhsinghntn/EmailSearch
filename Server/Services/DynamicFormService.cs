@@ -325,7 +325,7 @@ namespace DynamicFormsApp.Server.Services
         {
             return await _db.Forms
                 .Include(f => f.Fields)
-                .Where(f => f.IsDeleted)
+                .Where(f => f.IsDeleted && !f.IsDraft)
                 .ToListAsync();
         }
 
@@ -384,6 +384,18 @@ namespace DynamicFormsApp.Server.Services
                 _db.FormShares.Add(new FormShare { FormId = formId, UserName = targetUser });
                 await _db.SaveChangesAsync();
             }
+        }
+
+        public async Task ChangeOwnerAsync(int formId, string newOwner)
+        {
+            var form = await _db.Forms.FirstOrDefaultAsync(f => f.Id == formId);
+            if (form == null)
+            {
+                throw new InvalidOperationException("Form not found");
+            }
+
+            form.CreatedBy = newOwner;
+            await _db.SaveChangesAsync();
         }
 
         public async Task<List<FormShare>> GetFormSharesAsync(int formId, string requester)
